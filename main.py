@@ -9,14 +9,14 @@ screen.fill((0, 0, 0))
 
 # GESTION TEXTES
 bigFont = pygame.font.Font('freesansbold.ttf', 16)
-# smallFont = pygame.font.Font('freesansbold.ttf', 11)
+# smallFont est compatible avec les emojis
 smallFont = pygame.font.SysFont("segoeuisymbol", 15)
 
+# Fonction d'affichage de texte
 def show_infos(text, x, y, color, font):
     infos = font.render(text, True, color)
     screen.blit(infos, (x, y))
 
-# ETOILES/PLANETES
 
 # Générateur d'étoiles
 nbStars = 500
@@ -31,6 +31,7 @@ for i in range(nbStars):
 # Affichage des infos générales
 infosGenX = 250
 infosGenY = 10
+
 pygame.draw.rect(screen, (0, 0, 0), (infosGenX, infosGenY, 150, 90))
 show_infos("Système solaire", infosGenX, infosGenY, (252, 219, 3), bigFont)
 show_infos("🡱 pour accélérer", infosGenX, infosGenY +20, (255,255,255), smallFont)
@@ -42,7 +43,7 @@ show_infos("📖 Cliquez sur une", w-infosGenX-150, 10, (255,255,255), smallFont
 show_infos("planète pour avoir", w-infosGenX-150, 30, (255,255,255), smallFont)
 show_infos("ses informations !", w-infosGenX-150, 50, (255,255,255), smallFont)
 
-
+# ASTRES SYSTEME SOLAIRE
 
 class Planet:
     def __init__(self, name, radius, density, gravity, avgTemp, mass, color, textX, textY, angle, number):
@@ -88,6 +89,8 @@ class Axe:
     pass
 
 soleil = Star("soleil", 80, (255, 213, 0), "img/sun.png")
+
+# DEFINITIONS PLANETES
 
 # Pour chaque planète je définie un axe de rotation
 axeMercure = Axe()
@@ -154,8 +157,23 @@ neptuneInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/nept
 neptuneData = json.loads(neptuneInfos.text)
 neptune = Planet(neptuneData['name'], neptuneData['meanRadius'], neptuneData['density'], neptuneData['gravity'], neptuneData['avgTemp'], neptuneData['mass'], (51, 102, 255), 1370, 760, 1, 8)
 
+# GESTION ACCELERATION
 acceleration = 0
 isAccelerated = False
+
+def speedUp():
+    global isAccelerated
+    global acceleration
+    if(isAccelerated == False):
+        acceleration = 0.002
+        isAccelerated = True
+
+def slowDown():
+    global isAccelerated
+    global acceleration
+    if(isAccelerated == True):
+        acceleration = 0
+        isAccelerated = False
 
 play = True
 clock = pygame.time.Clock()
@@ -172,13 +190,9 @@ while play:
             if event.key == pygame.K_ESCAPE:
                 play = False
             if event.key == pygame.K_UP:
-                if isAccelerated == False:
-                    acceleration = 0.002 
-                    isAccelerated = True  
+                speedUp() 
             if event.key == pygame.K_DOWN:
-                if isAccelerated == True:
-                    acceleration = 0
-                    isAccelerated = False
+                slowDown() 
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
             if screen.get_at(pygame.mouse.get_pos()) == mercure.color:
@@ -205,8 +219,7 @@ while play:
             if screen.get_at(pygame.mouse.get_pos()) == neptune.color:
                 neptune.onClick()
                 print('neptune')
-            
-            
+                
 
     # Affichage du soleil
     screen.blit(soleil.img, (w/2 - soleil.radius, h/2 - soleil.radius))
@@ -262,7 +275,7 @@ while play:
     jupiter.angle -= 0.002 + acceleration * 2
     saturne.angle -= 0.0009 + acceleration * 0.8
     uranus.angle -= 0.0007 + acceleration * 0.6
-    neptune.angle -= 0.0005 + acceleration* 0.4
+    neptune.angle -= 0.0005 + acceleration * 0.4
     # Plus on s'éloigne du soleil plus elles mettent du temps à en faire le tour
 
     clock.tick(60)
