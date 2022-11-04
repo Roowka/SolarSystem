@@ -5,12 +5,13 @@ w,h = 1600, 1000
 screen = pygame.display.set_mode((w,h))
 print(pygame.display.get_window_size())
 
-screen.fill((0, 0, 0))
+screen.fill((0, 0, 0))  
 
 # GESTION TEXTES
-bigFont = pygame.font.Font('freesansbold.ttf', 16)
+titleFont = pygame.font.Font('freesansbold.ttf', 16)
+mainFont = pygame.font.Font('freesansbold.ttf', 14)
 # smallFont est compatible avec les emojis
-smallFont = pygame.font.SysFont("segoeuisymbol", 15)
+secondFont = pygame.font.SysFont("segoeuisymbol", 15)
 
 # Fonction d'affichage de texte
 def show_infos(text, x, y, color, font):
@@ -20,28 +21,30 @@ def show_infos(text, x, y, color, font):
 
 # Générateur d'étoiles
 nbStars = 500
-
+stars = []
 for i in range(nbStars):
-    starRadius = random.uniform(0.25, 2.5)
     starX = random.randint(0,w)
     starY = random.randint(0,h)
-    pygame.draw.circle(screen, (255,255,255), (starX, starY), starRadius)
+    stars.append((starX, starY))
+
+starsRadius = []
+for i in range(nbStars):
+    radius = random.uniform(0.5, 2.5)
+    starsRadius.append(radius)
 
 
 # Affichage des infos générales
 infosGenX = 250
 infosGenY = 10
 
-pygame.draw.rect(screen, (0, 0, 0), (infosGenX, infosGenY, 150, 90))
-show_infos("Système solaire", infosGenX, infosGenY, (252, 219, 3), bigFont)
-show_infos("🡱 pour accélérer", infosGenX, infosGenY +20, (255,255,255), smallFont)
-show_infos("🡳 pour ralentir", infosGenX, infosGenY +40, (255,255,255), smallFont)
-show_infos("© Lucas Goï - 2022", infosGenX, infosGenY +60, (255,255,255), smallFont)
+show_infos("Système solaire", infosGenX, infosGenY, (252, 219, 3), titleFont)
+show_infos("🡱 pour accélérer", infosGenX, infosGenY +20, (255,255,255), secondFont)
+show_infos("🡳 pour ralentir", infosGenX, infosGenY +40, (255,255,255), secondFont)
+show_infos("© Lucas Goï - 2022", infosGenX, infosGenY +60, (255,255,255), secondFont)
 
-pygame.draw.rect(screen, (0, 0, 0), (w-infosGenX-150, 10, 130, 70))
-show_infos("📖 Cliquez sur une", w-infosGenX-150, 10, (255,255,255), smallFont)
-show_infos("planète pour avoir", w-infosGenX-150, 30, (255,255,255), smallFont)
-show_infos("ses informations !", w-infosGenX-150, 50, (255,255,255), smallFont)
+show_infos("📖 Cliquez sur une", w-infosGenX-150, 10, (255,255,255), secondFont)
+show_infos("planète pour avoir", w-infosGenX-150, 30, (255,255,255), secondFont)
+show_infos("ses informations !", w-infosGenX-150, 50, (255,255,255), secondFont)
 
 # ASTRES SYSTEME SOLAIRE
 
@@ -63,18 +66,19 @@ class Planet:
     selectColor = (0, 0, 0)
     
     def onClick(self):
-        pygame.draw.rect(screen, (0, 0, 0), (self.textX,self.textY, 220, 200))
+        pygame.draw.rect(screen, (50, 50, 50), (self.textX,self.textY, 205, 110))
         if self.isClicked == False:
             self.isClicked = True
             self.selectColor = (255, 255, 255)
-            show_infos(str(self.number)+". "+self.name, self.textX, self.textY, self.color, bigFont)
-            show_infos("Densité : "+str(self.density)+" g/cm³", self.textX, self.textY+20, (255, 255, 255), bigFont)
-            show_infos("Gravité : "+str(self.gravity)+" m/s²", self.textX, self.textY+40, (255, 255, 255), bigFont)
-            show_infos("Température ~ : "+str(self.avgTemp)+"°C", self.textX, self.textY+60, (255, 255, 255), bigFont)
-            show_infos("Masse : "+str(self.mass['massValue'])+"x10^"+str(self.mass['massExponent'])+" kg", self.textX, self.textY+80, (255, 255, 255), bigFont)
+            show_infos(str(self.number)+". "+self.name, self.textX+5, self.textY+5, self.color, titleFont)
+            show_infos("Densité : "+str(self.density)+" g/cm³", self.textX+5, self.textY+25, (255, 255, 255), mainFont)
+            show_infos("Gravité : "+str(self.gravity)+" m/s²", self.textX+5, self.textY+45, (255, 255, 255), mainFont)
+            show_infos("Température ~ : "+str(self.avgTemp)+"°C", self.textX+5, self.textY+65, (255, 255, 255), mainFont)
+            show_infos("Masse : "+str(self.mass['massValue'])+"x10^"+str(self.mass['massExponent'])+" kg", self.textX+5, self.textY+85, (255, 255, 255), mainFont)
         else:
             self.isClicked = False
             self.selectColor = (0, 0, 0)
+            pygame.draw.rect(screen, (0, 0, 0), (self.textX,self.textY, 225, 110))
 
 
 class Star:
@@ -93,6 +97,7 @@ soleil = Star("soleil", 80, (255, 213, 0), "img/sun.png")
 # DEFINITIONS PLANETES
 
 # Pour chaque planète je définie un axe de rotation
+# J'ai fait une classe au cas ou j'ai besoin de plus d'informations
 axeMercure = Axe()
 axeMercure.radius = 100
 
@@ -115,7 +120,7 @@ axeTerre.radius = 160
 
 terreInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/terre")
 terreData = json.loads(terreInfos.text)
-terre = Planet(terreData['name'], terreData['meanRadius'], terreData['density'], terreData['gravity'], terreData['avgTemp'], terreData['mass'], (0, 153, 255), 10, 510, 0, 3)
+terre = Planet(terreData['name'], terreData['meanRadius'], terreData['density'], terreData['gravity'], terreData['avgTemp'], terreData['mass'], (0, 153, 255), 10, 600, 0, 3)
 
 
 axeMars = Axe()
@@ -123,7 +128,7 @@ axeMars.radius = 190
 
 marsInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/mars")
 marsData = json.loads(marsInfos.text)
-mars = Planet(marsData['name'], marsData['meanRadius'], marsData['density'], marsData['gravity'], marsData['avgTemp'], marsData['mass'], (204, 51, 0), 10, 760, 1.5, 4)
+mars = Planet(marsData['name'], marsData['meanRadius'], marsData['density'], marsData['gravity'], marsData['avgTemp'], marsData['mass'], (204, 51, 0), 10, 850, 1.5, 4)
 
 
 axeJupiter = Axe()
@@ -131,7 +136,7 @@ axeJupiter.radius = 280
 
 jupiterInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/jupiter")
 jupiterData = json.loads(jupiterInfos.text)
-jupiter = Planet(jupiterData['name'], jupiterData['meanRadius'], jupiterData['density'], jupiterData['gravity'], jupiterData['avgTemp'], jupiterData['mass'], (255, 204, 102), 1370, 10, 2, 5) 
+jupiter = Planet(jupiterData['name'], jupiterData['meanRadius'], jupiterData['density'], jupiterData['gravity'], jupiterData['avgTemp'], jupiterData['mass'], (255, 204, 102), 1385, 10, 2, 5) 
 
 
 axeSaturne = Axe()
@@ -139,7 +144,7 @@ axeSaturne.radius = 420
 
 saturneInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/saturne")
 saturneData = json.loads(saturneInfos.text)
-saturne = Planet(saturneData['name'], saturneData['meanRadius'], saturneData['density'], saturneData['gravity'], saturneData['avgTemp'], saturneData['mass'], (153, 153, 102), 1370, 260, -1, 6)
+saturne = Planet(saturneData['name'], saturneData['meanRadius'], saturneData['density'], saturneData['gravity'], saturneData['avgTemp'], saturneData['mass'], (153, 153, 102), 1385, 260, -1, 6)
 
 
 axeUranus = Axe()
@@ -147,7 +152,7 @@ axeUranus.radius = 510
 
 uranusInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/uranus")
 uranusData = json.loads(uranusInfos.text)
-uranus = Planet(uranusData['name'], uranusData['meanRadius'], uranusData['density'], uranusData['gravity'], uranusData['avgTemp'], uranusData['mass'], (102, 153, 255), 1370, 510, 3, 7)
+uranus = Planet(uranusData['name'], uranusData['meanRadius'], uranusData['density'], uranusData['gravity'], uranusData['avgTemp'], uranusData['mass'], (102, 153, 255), 1385, 600, 3, 7)
 
 
 axeNeptune = Axe()
@@ -155,7 +160,7 @@ axeNeptune.radius = 560
 
 neptuneInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/neptune")
 neptuneData = json.loads(neptuneInfos.text)
-neptune = Planet(neptuneData['name'], neptuneData['meanRadius'], neptuneData['density'], neptuneData['gravity'], neptuneData['avgTemp'], neptuneData['mass'], (51, 102, 255), 1370, 760, 1, 8)
+neptune = Planet(neptuneData['name'], neptuneData['meanRadius'], neptuneData['density'], neptuneData['gravity'], neptuneData['avgTemp'], neptuneData['mass'], (51, 102, 255), 1385, 850, 1, 8)
 
 # GESTION ACCELERATION
 acceleration = 0
@@ -175,7 +180,10 @@ def slowDown():
         acceleration = 0
         isAccelerated = False
 
+# GESTION BOUTON PAUSE
+pause = False
 play = True
+
 clock = pygame.time.Clock()
 
 while play:
@@ -185,7 +193,7 @@ while play:
         if event.type == pygame.MOUSEMOTION:
             pass
             # print(event.pos)
-        if event.type == pygame.KEYUP:
+        if event.type == pygame.KEYDOWN:
             print(event.key, event.unicode, event.scancode)
             if event.key == pygame.K_ESCAPE:
                 play = False
@@ -193,6 +201,14 @@ while play:
                 speedUp() 
             if event.key == pygame.K_DOWN:
                 slowDown() 
+            if event.key == pygame.K_SPACE:
+                pause = True
+                while pause:
+                    for event in pygame.event.get():
+                        if event.type==pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                            pause = False
+                            pygame.event.clear()
+                            break
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
             if screen.get_at(pygame.mouse.get_pos()) == mercure.color:
@@ -221,12 +237,17 @@ while play:
                 print('neptune')
                 
 
+    # Affichage des étoiles
+    i = 0
+    for star in stars:
+        pygame.draw.circle(screen, (255, 255, 255), star, starsRadius[i])
+        i += 1
+
     # Affichage du soleil
     screen.blit(soleil.img, (w/2 - soleil.radius, h/2 - soleil.radius))
 
     # Pour chaque planète je dessine son axe de rotation, la planète, le cercle blanc quand elle est sélectionnée et le cercle noir qui cache le blanc pour éviter les traits
-    # je remets pas le screen en noir pour ne pas cacher les étoiles
-    # je ne regénère pas les étoiles pour ne pas qu'elles bougent
+    # Je ne remets pas le fond en noir pour ne pas cacher les différents textes
     pygame.draw.circle(screen, (255, 255, 255), (w/2, h/2), axeMercure.radius, width=1)
     pygame.draw.circle(screen, (0,0,0), (w/2 + math.cos(mercure.angle+0.01) * axeMercure.radius , h/2 + math.sin(mercure.angle+0.01) * axeMercure.radius), mercure.radius + 6, width=6)
     pygame.draw.circle(screen, mercure.color, (w/2 + math.cos(mercure.angle) * axeMercure.radius, h/2 + math.sin(mercure.angle) * axeMercure.radius), mercure.radius)
@@ -268,15 +289,18 @@ while play:
     pygame.draw.circle(screen, neptune.selectColor, (w/2 + math.cos(neptune.angle) * axeNeptune.radius, h/2 + math.sin(neptune.angle) * axeNeptune.radius), neptune.radius + 4, width=4)
 
 
-    mercure.angle -= 0.01 + acceleration * 10
+    mercure.angle -= 0.01 + acceleration * 10 
     venus.angle -= 0.008 + acceleration * 8
     terre.angle -= 0.006 + acceleration * 6
     mars.angle -= 0.004 + acceleration * 4
     jupiter.angle -= 0.002 + acceleration * 2
-    saturne.angle -= 0.0009 + acceleration * 0.8
-    uranus.angle -= 0.0007 + acceleration * 0.6
-    neptune.angle -= 0.0005 + acceleration * 0.4
-    # Plus on s'éloigne du soleil plus elles mettent du temps à en faire le tour
+    saturne.angle -= 0.0009 + acceleration * 0.9
+    uranus.angle -= 0.0007 + acceleration * 0.7
+    neptune.angle -= 0.0005 + acceleration * 0.5
+    # les valeurs ne sont pas celles de l'API car les vitesses réelles n'auraient aucun sens dans cette simulation
+    # Mercure est 684 fois plus rapide que Neptune par exemple
+    # donc j'ai mis des valeurs décroissantes pour quand même voir la différence de vitesse mais ne sont pas représentatives de la réalité
+    # les * 10, * 8, * 6... font en sorte que l'accelération soit proportionnelle à la vitesse de base
 
     clock.tick(60)
     pygame.display.flip()
