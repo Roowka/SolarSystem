@@ -30,7 +30,7 @@ for i in range(nbStars):
 class Planet:
     def __init__(self, name, radius, density, gravity, avgTemp, mass, color, textX, textY, angle):
         self.name = name
-        self.radius = radius / 1000 # Pour garder la proportionnalité entre les planètes, seulement le soleil ne l'est pas
+        self.radius = radius / 1000 # Pour garder la proportionnalité entre les planètes, seulement le soleil ne l'est pas car trop grand
         self.density = density
         self.gravity = gravity
         self.avgTemp = avgTemp
