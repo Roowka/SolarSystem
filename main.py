@@ -40,11 +40,13 @@ infosGenY = 10
 show_infos("Système solaire", infosGenX, infosGenY, (252, 219, 3), titleFont)
 show_infos("🡱 pour accélérer", infosGenX, infosGenY +20, (255,255,255), secondFont)
 show_infos("🡳 pour ralentir", infosGenX, infosGenY +40, (255,255,255), secondFont)
-show_infos("© Lucas Goï - 2022", infosGenX, infosGenY +60, (255,255,255), secondFont)
+show_infos("Espace pour ⏯",infosGenX, infosGenY+60, (255,255,255), secondFont)
 
 show_infos("📖 Cliquez sur une", w-infosGenX-150, 10, (255,255,255), secondFont)
 show_infos("planète pour avoir", w-infosGenX-150, 30, (255,255,255), secondFont)
 show_infos("ses informations !", w-infosGenX-150, 50, (255,255,255), secondFont)
+
+show_infos("© Lucas Goï - 2022", infosGenX, h-30, (255,255,255), secondFont)
 
 # ASTRES SYSTEME SOLAIRE
 
@@ -192,7 +194,6 @@ while play:
             play = False
         if event.type == pygame.MOUSEMOTION:
             pass
-            # print(event.pos)
         if event.type == pygame.KEYDOWN:
             print(event.key, event.unicode, event.scancode)
             if event.key == pygame.K_ESCAPE:
@@ -205,10 +206,14 @@ while play:
                 pause = True
                 while pause:
                     for event in pygame.event.get():
-                        if event.type==pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                            pause = False
-                            pygame.event.clear()
-                            break
+                        if event.type==pygame.KEYDOWN:
+                            if event.key == pygame.K_SPACE:
+                                pause = False
+                                pygame.event.clear()
+                                break
+                            if event.key == pygame.K_ESCAPE:
+                                play = False
+                                pause = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
             if screen.get_at(pygame.mouse.get_pos()) == mercure.color:
