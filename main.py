@@ -50,18 +50,45 @@ show_infos("© Lucas Goï - 2022", infosGenX, h-30, (255,255,255), secondFont)
 
 # ASTRES SYSTEME SOLAIRE
 
+# Définition des couleurs
+MERCURE_COLOR = (128, 128, 128)
+VENUS_COLOR = (255, 153, 51)
+TERRE_COLOR = (0, 153, 255)
+MARS_COLOR = (204, 51, 0)
+JUPITER_COLOR = (255, 204, 102)
+SATURNE_COLOR = (153, 153, 102)
+URANUS_COLOR = (102, 153, 255)
+NEPTUNE_COLOR = (51, 102, 255)
+
+def getPlanetInfos(id):
+    match id:
+        case 'mercure':
+            return (MERCURE_COLOR, 10, 10, 3, 100)
+        case 'venus':
+            return (VENUS_COLOR, 10, 260, 2, 130)
+        case 'terre':
+            return (TERRE_COLOR, 10, 600, 0, 160)
+        case 'mars':
+            return (MARS_COLOR, 10, 850, 1.5, 190)
+        case 'jupiter':
+            return (JUPITER_COLOR, 1385, 10, 2, 280)
+        case 'saturne':
+            return (SATURNE_COLOR, 1385, 260, -1, 420)
+        case 'uranus':
+            return (URANUS_COLOR, 1385, 600, 3, 510)
+        case 'neptune':
+            return (NEPTUNE_COLOR, 1385, 850, 1, 560)
+
+
 class Planet:
-    def __init__(self, name, radius, density, gravity, avgTemp, mass, color, textX, textY, angle, number):
+    def __init__(self, name, radius, density, gravity, avgTemp, mass, tupleInfos, number):
         self.name = name
         self.radius = radius / 1000 # Pour garder la proportionnalité entre les planètes, seulement le soleil ne l'est pas car trop grand
         self.density = density
         self.gravity = gravity
         self.avgTemp = avgTemp - 273,15 # Pour passer de °K à °C
         self.mass = mass
-        self.color = color
-        self.textX = textX
-        self.textY = textY
-        self.angle = angle
+        self.color, self.textX, self.textY, self.angle, self.axe = tupleInfos
         self.number = number
 
     isClicked = False
@@ -91,78 +118,20 @@ class Star:
         self.img = pygame.image.load(imgPath)
         self.img = pygame.transform.scale(self.img, (160, 160))
 
-class Axe:
-    pass
 
 soleil = Star("soleil", 80, (255, 213, 0), "img/sun.png")
 
 # DEFINITIONS PLANETES
 
-# Pour chaque planète je définie un axe de rotation
-# J'ai fait une classe au cas ou j'ai besoin de plus d'informations
-axeMercure = Axe()
-axeMercure.radius = 100
+planetsList = ['mercure', 'venus', 'terre', 'mars', 'jupiter', 'saturne', 'uranus', 'neptune']
+planets = []
+index = 1
+for planet in planetsList:
+    planetInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/"+planet)
+    planetData = json.loads(planetInfos.text)
+    planets.append(Planet(planetData['name'], planetData['meanRadius'], planetData['density'], planetData['gravity'], planetData['avgTemp'], planetData['mass'], getPlanetInfos(planetData['id']), index))
+    index += 1
 
-# Je récupère les données de chaque planète avec l'api <<api.le-systeme-solaire.net>> et je construis mes objets planètes avec ces données
-mercureInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/mercure")
-mercureData = json.loads(mercureInfos.text)
-mercure = Planet(mercureData['name'], mercureData['meanRadius'], mercureData['density'], mercureData['gravity'], mercureData['avgTemp'], mercureData['mass'], (128, 128, 128), 10, 10, 3, 1)  
- 
-
-axeVenus = Axe()
-axeVenus.radius = 130
-
-venusInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/venus")
-venusData = json.loads(venusInfos.text)
-venus = Planet(venusData['name'], venusData['meanRadius'], venusData['density'], venusData['gravity'], venusData['avgTemp'], venusData['mass'], (255, 153, 51), 10, 260, 2, 2) 
-
-
-axeTerre = Axe()
-axeTerre.radius = 160
-
-terreInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/terre")
-terreData = json.loads(terreInfos.text)
-terre = Planet(terreData['name'], terreData['meanRadius'], terreData['density'], terreData['gravity'], terreData['avgTemp'], terreData['mass'], (0, 153, 255), 10, 600, 0, 3)
-
-
-axeMars = Axe()
-axeMars.radius = 190
-
-marsInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/mars")
-marsData = json.loads(marsInfos.text)
-mars = Planet(marsData['name'], marsData['meanRadius'], marsData['density'], marsData['gravity'], marsData['avgTemp'], marsData['mass'], (204, 51, 0), 10, 850, 1.5, 4)
-
-
-axeJupiter = Axe()
-axeJupiter.radius = 280
-
-jupiterInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/jupiter")
-jupiterData = json.loads(jupiterInfos.text)
-jupiter = Planet(jupiterData['name'], jupiterData['meanRadius'], jupiterData['density'], jupiterData['gravity'], jupiterData['avgTemp'], jupiterData['mass'], (255, 204, 102), 1385, 10, 2, 5) 
-
-
-axeSaturne = Axe()
-axeSaturne.radius = 420
-
-saturneInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/saturne")
-saturneData = json.loads(saturneInfos.text)
-saturne = Planet(saturneData['name'], saturneData['meanRadius'], saturneData['density'], saturneData['gravity'], saturneData['avgTemp'], saturneData['mass'], (153, 153, 102), 1385, 260, -1, 6)
-
-
-axeUranus = Axe()
-axeUranus.radius = 510
-
-uranusInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/uranus")
-uranusData = json.loads(uranusInfos.text)
-uranus = Planet(uranusData['name'], uranusData['meanRadius'], uranusData['density'], uranusData['gravity'], uranusData['avgTemp'], uranusData['mass'], (102, 153, 255), 1385, 600, 3, 7)
-
-
-axeNeptune = Axe()
-axeNeptune.radius = 560
-
-neptuneInfos = requests.get("https://api.le-systeme-solaire.net/rest/bodies/neptune")
-neptuneData = json.loads(neptuneInfos.text)
-neptune = Planet(neptuneData['name'], neptuneData['meanRadius'], neptuneData['density'], neptuneData['gravity'], neptuneData['avgTemp'], neptuneData['mass'], (51, 102, 255), 1385, 850, 1, 8)
 
 # GESTION ACCELERATION
 acceleration = 0
@@ -216,29 +185,29 @@ while play:
                                 pause = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             x, y = event.pos
-            if screen.get_at(pygame.mouse.get_pos()) == mercure.color:
-                mercure.onClick()
+            if screen.get_at(pygame.mouse.get_pos()) == planets[0].color:
+                planets[0].onClick()
                 print('mercure')
-            if screen.get_at(pygame.mouse.get_pos()) == venus.color:
-                venus.onClick()
+            if screen.get_at(pygame.mouse.get_pos()) == planets[1].color:
+                planets[1].onClick()
                 print('venus')
-            if screen.get_at(pygame.mouse.get_pos()) == terre.color:
-                terre.onClick()
+            if screen.get_at(pygame.mouse.get_pos()) == planets[2].color:
+                planets[2].onClick()
                 print('terre')
-            if screen.get_at(pygame.mouse.get_pos()) == mars.color:
-                mars.onClick()
+            if screen.get_at(pygame.mouse.get_pos()) == planets[3].color:
+                planets[3].onClick()
                 print('mars')
-            if screen.get_at(pygame.mouse.get_pos()) == jupiter.color:
-                jupiter.onClick()
+            if screen.get_at(pygame.mouse.get_pos()) == planets[4].color:
+                planets[4].onClick()
                 print('jupiter')
-            if screen.get_at(pygame.mouse.get_pos()) == saturne.color:
-                saturne.onClick()
+            if screen.get_at(pygame.mouse.get_pos()) == planets[5].color:
+                planets[5].onClick()
                 print('saturne')
-            if screen.get_at(pygame.mouse.get_pos()) == uranus.color:
-                uranus.onClick()
+            if screen.get_at(pygame.mouse.get_pos()) == planets[6].color:
+                planets[6].onClick()
                 print('uranus')
-            if screen.get_at(pygame.mouse.get_pos()) == neptune.color:
-                neptune.onClick()
+            if screen.get_at(pygame.mouse.get_pos()) == planets[7].color:
+                planets[7].onClick()
                 print('neptune')
                 
 
@@ -253,55 +222,22 @@ while play:
 
     # Pour chaque planète je dessine son axe de rotation, la planète, le cercle blanc quand elle est sélectionnée et le cercle noir qui cache le blanc pour éviter les traits
     # Je ne remets pas le fond en noir pour ne pas cacher les différents textes
-    pygame.draw.circle(screen, (255, 255, 255), (w/2, h/2), axeMercure.radius, width=1)
-    pygame.draw.circle(screen, (0,0,0), (w/2 + math.cos(mercure.angle+0.01) * axeMercure.radius , h/2 + math.sin(mercure.angle+0.01) * axeMercure.radius), mercure.radius + 6, width=6)
-    pygame.draw.circle(screen, mercure.color, (w/2 + math.cos(mercure.angle) * axeMercure.radius, h/2 + math.sin(mercure.angle) * axeMercure.radius), mercure.radius)
-    pygame.draw.circle(screen, mercure.selectColor, (w/2 + math.cos(mercure.angle) * axeMercure.radius, h/2 + math.sin(mercure.angle) * axeMercure.radius), mercure.radius + 3, width=3) 
 
-    pygame.draw.circle(screen, (255, 255, 255), (w/2, h/2), axeVenus.radius, width=1)
-    pygame.draw.circle(screen, (0,0,0), (w/2 + math.cos(venus.angle+0.009) * axeVenus.radius , h/2 + math.sin(venus.angle+0.009) * axeVenus.radius), venus.radius + 6, width=6)
-    pygame.draw.circle(screen, venus.color, (w/2 + math.cos(venus.angle) * axeVenus.radius, h/2 + math.sin(venus.angle) * axeVenus.radius), venus.radius)
-    pygame.draw.circle(screen, venus.selectColor, (w/2 + math.cos(venus.angle) * axeVenus.radius, h/2 + math.sin(venus.angle) * axeVenus.radius), venus.radius + 3, width=3)
-    
-    pygame.draw.circle(screen, (255, 255, 255), (w/2, h/2), axeTerre.radius, width=1)
-    pygame.draw.circle(screen, (0,0,0), (w/2 + math.cos(terre.angle+0.008) * axeTerre.radius , h/2 + math.sin(terre.angle+0.008) * axeTerre.radius), terre.radius + 6, width=6)
-    pygame.draw.circle(screen, terre.selectColor, (w/2 + math.cos(terre.angle) * axeTerre.radius, h/2 + math.sin(terre.angle) * axeTerre.radius), terre.radius + 3, width=3)
-    pygame.draw.circle(screen, terre.color, (w/2 + math.cos(terre.angle) * axeTerre.radius, h/2 + math.sin(terre.angle) * axeTerre.radius), terre.radius)
+    for planet in planets:
+        pygame.draw.circle(screen, (255, 255, 255), (w/2, h/2), planet.axe, width=1)
+        pygame.draw.circle(screen, (0,0,0), (w/2 + math.cos(planet.angle+0.01) * planet.axe , h/2 + math.sin(planet.angle+0.01) * planet.axe), planet.radius + 6, width=8)
+        pygame.draw.circle(screen, planet.color, (w/2 + math.cos(planet.angle) * planet.axe, h/2 + math.sin(planet.angle) * planet.axe), planet.radius)
+        pygame.draw.circle(screen, planet.selectColor, (w/2 + math.cos(planet.angle) * planet.axe, h/2 + math.sin(planet.angle) * planet.axe), planet.radius + 3, width=3) 
+ 
 
-    pygame.draw.circle(screen, (255, 255, 255), (w/2, h/2), axeMars.radius, width=1)
-    pygame.draw.circle(screen, (0,0,0), (w/2 + math.cos(mars.angle+0.007) * axeMars.radius , h/2 + math.sin(mars.angle+0.007) * axeMars.radius), mars.radius + 6, width=6)
-    pygame.draw.circle(screen, mars.color, (w/2 + math.cos(mars.angle) * axeMars.radius, h/2 + math.sin(mars.angle) * axeMars.radius), mars.radius)
-    pygame.draw.circle(screen, mars.selectColor, (w/2 + math.cos(mars.angle) * axeMars.radius, h/2 + math.sin(mars.angle) * axeMars.radius), mars.radius + 3, width=3)
-
-    pygame.draw.circle(screen, (255, 255, 255), (w/2, h/2), axeJupiter.radius, width=1)
-    pygame.draw.circle(screen, (0,0,0), (w/2 + math.cos(jupiter.angle+0.006) * axeJupiter.radius , h/2 + math.sin(jupiter.angle+0.006) * axeJupiter.radius), jupiter.radius + 5, width=5)
-    pygame.draw.circle(screen, jupiter.color, (w/2 + math.cos(jupiter.angle) * axeJupiter.radius, h/2 + math.sin(jupiter.angle) * axeJupiter.radius), jupiter.radius)
-    pygame.draw.circle(screen, jupiter.selectColor, (w/2 + math.cos(jupiter.angle) * axeJupiter.radius, h/2 + math.sin(jupiter.angle) * axeJupiter.radius), jupiter.radius + 4, width=4)
-
-    pygame.draw.circle(screen, (255, 255, 255), (w/2, h/2), axeSaturne.radius, width=1)
-    pygame.draw.circle(screen, (0,0,0), (w/2 + math.cos(saturne.angle+0.005) * axeSaturne.radius , h/2 + math.sin(saturne.angle+0.005) * axeSaturne.radius), saturne.radius + 5, width=5)
-    pygame.draw.circle(screen, saturne.color, (w/2 + math.cos(saturne.angle) * axeSaturne.radius, h/2 + math.sin(saturne.angle) * axeSaturne.radius), saturne.radius)
-    pygame.draw.circle(screen, saturne.selectColor, (w/2 + math.cos(saturne.angle) * axeSaturne.radius, h/2 + math.sin(saturne.angle) * axeSaturne.radius), saturne.radius + 4, width=4)
-
-    pygame.draw.circle(screen, (255, 255, 255), (w/2, h/2), axeUranus.radius, width=1)
-    pygame.draw.circle(screen, (0,0,0), (w/2 + math.cos(uranus.angle+0.004) * axeUranus.radius , h/2 + math.sin(uranus.angle+0.004) * axeUranus.radius), uranus.radius + 5, width=5)
-    pygame.draw.circle(screen, uranus.color, (w/2 + math.cos(uranus.angle) * axeUranus.radius, h/2 + math.sin(uranus.angle) * axeUranus.radius), uranus.radius)
-    pygame.draw.circle(screen, uranus.selectColor, (w/2 + math.cos(uranus.angle) * axeUranus.radius, h/2 + math.sin(uranus.angle) * axeUranus.radius), uranus.radius + 4, width=4)
-
-    pygame.draw.circle(screen, (255, 255, 255), (w/2, h/2), axeNeptune.radius, width=1)
-    pygame.draw.circle(screen, (0,0,0), (w/2 + math.cos(neptune.angle+0.003) * axeNeptune.radius , h/2 + math.sin(neptune.angle+0.003) * axeNeptune.radius), neptune.radius + 5, width=5)
-    pygame.draw.circle(screen, neptune.color, (w/2 + math.cos(neptune.angle) * axeNeptune.radius, h/2 + math.sin(neptune.angle) * axeNeptune.radius), neptune.radius)
-    pygame.draw.circle(screen, neptune.selectColor, (w/2 + math.cos(neptune.angle) * axeNeptune.radius, h/2 + math.sin(neptune.angle) * axeNeptune.radius), neptune.radius + 4, width=4)
-
-
-    mercure.angle -= 0.01 + acceleration * 10 
-    venus.angle -= 0.008 + acceleration * 8
-    terre.angle -= 0.006 + acceleration * 6
-    mars.angle -= 0.004 + acceleration * 4
-    jupiter.angle -= 0.002 + acceleration * 2
-    saturne.angle -= 0.0009 + acceleration * 0.9
-    uranus.angle -= 0.0007 + acceleration * 0.7
-    neptune.angle -= 0.0005 + acceleration * 0.5
+    planets[0].angle -= 0.01 + acceleration * 10 
+    planets[1].angle -= 0.008 + acceleration * 8
+    planets[2].angle -= 0.006 + acceleration * 6
+    planets[3].angle -= 0.004 + acceleration * 4
+    planets[4].angle -= 0.002 + acceleration * 2
+    planets[5].angle -= 0.0009 + acceleration * 0.9
+    planets[6].angle -= 0.0007 + acceleration * 0.7
+    planets[7].angle -= 0.0005 + acceleration * 0.5
     # les valeurs ne sont pas celles de l'API car les vitesses réelles n'auraient aucun sens dans cette simulation
     # Mercure est 684 fois plus rapide que Neptune par exemple
     # donc j'ai mis des valeurs décroissantes pour quand même voir la différence de vitesse mais ne sont pas représentatives de la réalité
