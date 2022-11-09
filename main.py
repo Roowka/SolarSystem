@@ -7,17 +7,31 @@ mixer.init()
 # Easter egg Star Wars
 mixer.music.load('music/impwalk.mp3')
 
+# Fullscreen
 screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
 w,h = pygame.display.get_surface().get_size()
+
+# Si n veut définir des dimensions manuelles
+# w, h= 1600,800
+# screen = pygame.display.set_mode((w,h))
+
 print(pygame.display.get_window_size())
 
 screen.fill((0, 0, 0))  
 
+# Box avec les infos des planètes
+textBoxWidth = w/8 - 20
+textBoxHeight = 110
+
+print(1-(textBoxHeight/1000))
+
 # GESTION TEXTES
-titleFont = pygame.font.Font('freesansbold.ttf', 16)
-mainFont = pygame.font.Font('freesansbold.ttf', 14)
+# S'adapte à la taille de la fenêtre
+titleFont = pygame.font.Font('freesansbold.ttf', int(textBoxWidth/20 + 5))
+mainFont = pygame.font.Font('freesansbold.ttf', int(textBoxWidth/20 + 3))
 # smallFont est compatible avec les emojis
-secondFont = pygame.font.SysFont("segoeuisymbol", 15)
+secondFont = pygame.font.SysFont("segoeuisymbol", int(textBoxWidth/20 + 4))
+
 
 # Fonction d'affichage de texte
 def show_infos(text, x, y, color, font):
@@ -54,9 +68,6 @@ show_infos("ses informations !", w-infosGenX-150, 50, (255,255,255), secondFont)
 
 show_infos("© Lucas Goï - 2022", infosGenX, h-30, (255,255,255), secondFont)
 
-textBoxWidth = w/9
-textBoxHeight = h/9
-
 # ASTRES SYSTEME SOLAIRE
 
 # Définition des couleurs
@@ -69,24 +80,26 @@ SATURNE_COLOR = (153, 153, 102)
 URANUS_COLOR = (102, 153, 255)
 NEPTUNE_COLOR = (51, 102, 255)
 
+# Fonction pour récupérer des données propres à chaque planète et qui ne proviennent pas de l'API
+# Je renvoie des tuples qui seront utilisés dans le constructeur
 def getPlanetInfos(id):
     match id:
         case 'mercure':
             return (MERCURE_COLOR, 10, 10, 3, 100)
         case 'venus':
-            return (VENUS_COLOR, 10, textBoxHeight * 2, 2, 130)
+            return (VENUS_COLOR, 10, textBoxHeight +20, 2, 130)
         case 'terre':
-            return (TERRE_COLOR, 10, textBoxHeight * 4, 0, 160)
+            return (TERRE_COLOR, 10, textBoxHeight * 2+30, 0, 160)
         case 'mars':
-            return (MARS_COLOR, 10, textBoxHeight * 6, 1.5, 190)
+            return (MARS_COLOR, 10, textBoxHeight * 3+40, 1.5, 190)
         case 'jupiter':
             return (JUPITER_COLOR, w-textBoxWidth-10, 10, 2, 280)
         case 'saturne':
-            return (SATURNE_COLOR, w-textBoxWidth-10, textBoxHeight * 2, -1, 420)
+            return (SATURNE_COLOR, w-textBoxWidth-10, textBoxHeight +20, -1, 420)
         case 'uranus':
-            return (URANUS_COLOR, w-textBoxWidth-10, textBoxHeight * 4, 3, 510)
+            return (URANUS_COLOR, w-textBoxWidth-10, textBoxHeight * 2+30, 3, 510)
         case 'neptune':
-            return (NEPTUNE_COLOR, w-textBoxWidth-10, textBoxHeight * 6, 1, 560)
+            return (NEPTUNE_COLOR, w-textBoxWidth-10, textBoxHeight * 3+40, 1, 560)
 
 
 class Planet:
@@ -109,7 +122,7 @@ class Planet:
             self.isClicked = True
             self.selectColor = (255, 255, 255)
             show_infos(str(self.number)+". "+self.name, self.textX+5, self.textY+5, self.color, titleFont)
-            show_infos("Densité : "+str(self.density)+" g/cm³", self.textX+5, self.textY+25, (255, 255, 255), mainFont)
+            show_infos("Densité : "+str(self.density)+" g/cm³", self.textX+5, self.textY+ 25, (255, 255, 255), mainFont)
             show_infos("Gravité : "+str(self.gravity)+" m/s²", self.textX+5, self.textY+45, (255, 255, 255), mainFont)
             show_infos("Température ~ : "+str(self.avgTemp)+"°C", self.textX+5, self.textY+65, (255, 255, 255), mainFont)
             show_infos("Masse : "+str(self.mass['massValue'])+"x10^"+str(self.mass['massExponent'])+" kg", self.textX+5, self.textY+85, (255, 255, 255), mainFont)
@@ -182,6 +195,7 @@ pause = False
 play = True
 
 
+# BOUCLE PRINCIPALE
 clock = pygame.time.Clock()
 
 while play:
