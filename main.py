@@ -1,8 +1,14 @@
 import sys, pygame, random, requests, json, math
-pygame.init()
+from pygame import mixer
 
-w,h = 1600, 1000
-screen = pygame.display.set_mode((w,h))
+pygame.init()
+mixer.init()
+
+# Easter egg Star Wars
+mixer.music.load('music/impwalk.mp3')
+
+screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+w,h = pygame.display.get_surface().get_size()
 print(pygame.display.get_window_size())
 
 screen.fill((0, 0, 0))  
@@ -48,6 +54,9 @@ show_infos("ses informations !", w-infosGenX-150, 50, (255,255,255), secondFont)
 
 show_infos("© Lucas Goï - 2022", infosGenX, h-30, (255,255,255), secondFont)
 
+textBoxWidth = w/9
+textBoxHeight = h/9
+
 # ASTRES SYSTEME SOLAIRE
 
 # Définition des couleurs
@@ -65,19 +74,19 @@ def getPlanetInfos(id):
         case 'mercure':
             return (MERCURE_COLOR, 10, 10, 3, 100)
         case 'venus':
-            return (VENUS_COLOR, 10, 260, 2, 130)
+            return (VENUS_COLOR, 10, textBoxHeight * 2, 2, 130)
         case 'terre':
-            return (TERRE_COLOR, 10, 600, 0, 160)
+            return (TERRE_COLOR, 10, textBoxHeight * 4, 0, 160)
         case 'mars':
-            return (MARS_COLOR, 10, 850, 1.5, 190)
+            return (MARS_COLOR, 10, textBoxHeight * 6, 1.5, 190)
         case 'jupiter':
-            return (JUPITER_COLOR, 1385, 10, 2, 280)
+            return (JUPITER_COLOR, w-textBoxWidth-10, 10, 2, 280)
         case 'saturne':
-            return (SATURNE_COLOR, 1385, 260, -1, 420)
+            return (SATURNE_COLOR, w-textBoxWidth-10, textBoxHeight * 2, -1, 420)
         case 'uranus':
-            return (URANUS_COLOR, 1385, 600, 3, 510)
+            return (URANUS_COLOR, w-textBoxWidth-10, textBoxHeight * 4, 3, 510)
         case 'neptune':
-            return (NEPTUNE_COLOR, 1385, 850, 1, 560)
+            return (NEPTUNE_COLOR, w-textBoxWidth-10, textBoxHeight * 6, 1, 560)
 
 
 class Planet:
@@ -95,7 +104,7 @@ class Planet:
     selectColor = (0, 0, 0)
     
     def onClick(self):
-        pygame.draw.rect(screen, (50, 50, 50), (self.textX,self.textY, 205, 110))
+        pygame.draw.rect(screen, (50, 50, 50), (self.textX,self.textY, textBoxWidth, textBoxHeight))
         if self.isClicked == False:
             self.isClicked = True
             self.selectColor = (255, 255, 255)
@@ -107,7 +116,7 @@ class Planet:
         else:
             self.isClicked = False
             self.selectColor = (0, 0, 0)
-            pygame.draw.rect(screen, (0, 0, 0), (self.textX,self.textY, 225, 110))
+            pygame.draw.rect(screen, (0, 0, 0), (self.textX,self.textY, textBoxWidth, textBoxHeight))
 
 
 class Star:
@@ -120,9 +129,25 @@ class Star:
 
 
 soleil = Star("soleil", 80, (255, 213, 0), "img/sun.png")
+soleil.isNormal = True
+
+
+# Marre du soleil classique ? Essayez plutôt le côté obscur...
+def switchStar():
+    if(soleil.isNormal == True):
+        pygame.draw.circle(screen, (0, 0, 0), (w/2, h/2), soleil.radius)
+        soleil.img = pygame.image.load('img/deathstar.png')
+        soleil.img = pygame.transform.scale(soleil.img, (160, 160))
+        soleil.isNormal = False
+        mixer.music.play()
+    else:
+        pygame.draw.circle(screen, (0, 0, 0), (w/2, h/2), soleil.radius)
+        soleil.img = pygame.image.load('img/sun.png')
+        soleil.img = pygame.transform.scale(soleil.img, (160, 160))
+        soleil.isNormal = True
+        mixer.music.stop()
 
 # DEFINITIONS PLANETES
-
 planetsList = ['mercure', 'venus', 'terre', 'mars', 'jupiter', 'saturne', 'uranus', 'neptune']
 planets = []
 index = 1
@@ -151,9 +176,11 @@ def slowDown():
         acceleration = 0
         isAccelerated = False
 
+
 # GESTION BOUTON PAUSE
 pause = False
 play = True
+
 
 clock = pygame.time.Clock()
 
@@ -167,8 +194,10 @@ while play:
             print(event.key, event.unicode, event.scancode)
             if event.key == pygame.K_ESCAPE:
                 play = False
+            if event.key == pygame.K_d:
+                switchStar()
             if event.key == pygame.K_UP:
-                speedUp() 
+                speedUp()
             if event.key == pygame.K_DOWN:
                 slowDown() 
             if event.key == pygame.K_SPACE:
@@ -220,14 +249,12 @@ while play:
     # Affichage du soleil
     screen.blit(soleil.img, (w/2 - soleil.radius, h/2 - soleil.radius))
 
-    # Pour chaque planète je dessine son axe de rotation, la planète, le cercle blanc quand elle est sélectionnée et le cercle noir qui cache le blanc pour éviter les traits
-    # Je ne remets pas le fond en noir pour ne pas cacher les différents textes
-
+    # Pour chaque planète je dessine son axe de rotation, le cercle noir qui cache le blanc pour éviter les traits, le cercle blanc quand elle est sélectionnée et la planète 
     for planet in planets:
         pygame.draw.circle(screen, (255, 255, 255), (w/2, h/2), planet.axe, width=1)
-        pygame.draw.circle(screen, (0,0,0), (w/2 + math.cos(planet.angle+0.01) * planet.axe , h/2 + math.sin(planet.angle+0.01) * planet.axe), planet.radius + 6, width=8)
+        pygame.draw.circle(screen, (0,0,0), (w/2 + math.cos(planet.angle+0.01) * planet.axe , h/2 + math.sin(planet.angle+0.01) * planet.axe), planet.radius + 6)
+        pygame.draw.circle(screen, planet.selectColor, (w/2 + math.cos(planet.angle) * planet.axe, h/2 + math.sin(planet.angle) * planet.axe), planet.radius + 3)
         pygame.draw.circle(screen, planet.color, (w/2 + math.cos(planet.angle) * planet.axe, h/2 + math.sin(planet.angle) * planet.axe), planet.radius)
-        pygame.draw.circle(screen, planet.selectColor, (w/2 + math.cos(planet.angle) * planet.axe, h/2 + math.sin(planet.angle) * planet.axe), planet.radius + 3, width=3) 
  
 
     planets[0].angle -= 0.01 + acceleration * 10 
