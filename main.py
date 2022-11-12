@@ -29,7 +29,7 @@ print(1-(textBoxHeight/1000))
 # S'adapte à la taille de la fenêtre
 titleFont = pygame.font.Font('freesansbold.ttf', int(textBoxWidth/20 + 5))
 mainFont = pygame.font.Font('freesansbold.ttf', int(textBoxWidth/20 + 3))
-# smallFont est compatible avec les emojis
+# secondFont est compatible avec les emojis
 secondFont = pygame.font.SysFont("segoeuisymbol", int(textBoxWidth/20 + 4))
 
 
@@ -67,6 +67,7 @@ show_infos("planète pour avoir", w-infosGenX-150, 30, (255,255,255), secondFont
 show_infos("ses informations !", w-infosGenX-150, 50, (255,255,255), secondFont)
 
 show_infos("© Lucas Goï - 2022", infosGenX, h-30, (255,255,255), secondFont)
+
 
 # ASTRES SYSTEME SOLAIRE
 
